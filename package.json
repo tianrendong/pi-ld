@@ -1,0 +1,54 @@
+{
+  "name": "pi-ld",
+  "version": "0.1.0",
+  "description": "Pi tools + skill for reading and safely changing LaunchDarkly feature flags via the ldcli CLI.",
+  "keywords": [
+    "pi",
+    "pi-package",
+    "launchdarkly",
+    "ldcli",
+    "feature-flags"
+  ],
+  "license": "MIT",
+  "author": "tianrendong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tianrendong/pi-ld.git"
+  },
+  "homepage": "https://github.com/tianrendong/pi-ld#readme",
+  "bugs": {
+    "url": "https://github.com/tianrendong/pi-ld/issues"
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ],
+    "skills": [
+      "./skills"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@types/node": "^22.19.0",
+    "jiti": "^2.7.0",
+    "typebox": "*",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs"
+  }
+}
