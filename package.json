@@ -1,7 +1,7 @@
 {
   "name": "pi-ld",
-  "version": "0.1.0",
-  "description": "Pi tools + skill for reading and safely changing LaunchDarkly feature flags via the ldcli CLI.",
+  "version": "0.2.0",
+  "description": "Pi tools for reading and safely changing LaunchDarkly feature flags via the ldcli CLI.",
   "keywords": [
     "pi",
     "pi-package",
@@ -22,16 +22,12 @@
   "type": "module",
   "files": [
     "src",
-    "skills",
     "README.md",
     "LICENSE"
   ],
   "pi": {
     "extensions": [
       "./src/index.ts"
-    ],
-    "skills": [
-      "./skills"
     ]
   },
   "peerDependencies": {
