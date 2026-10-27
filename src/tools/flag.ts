@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { assertSafeKey, flagEq, pushOpt } from "../lib/argv";
-import { parseJsonOutput, runLdcli, toolResult } from "../lib/exec";
+import { LD_FLAG_OUTPUT_SCHEMA, LD_FLAG_STATUS_OUTPUT_SCHEMA, parseJsonOutput, runLdcli, toolResult } from "../lib/exec";
 
 const FlagParams = Type.Object({
   project: Type.String({ description: "LaunchDarkly project key." }),
@@ -40,6 +40,7 @@ export function registerFlagGet(pi: ExtensionAPI) {
     label: "LaunchDarkly: get flag",
     description: "Get one feature flag and its targeting configuration through `ldcli`. Read-only. Use env to limit output to one environment.",
     promptSnippet: "launchdarkly_flag_get: inspect one feature flag",
+    outputSchema: LD_FLAG_OUTPUT_SCHEMA,
     parameters: FlagParams,
     async execute(_id, params: FlagParamsValue, signal, _onUpdate, ctx) {
       const input = flagReadArgs("get", params);
@@ -56,6 +57,7 @@ export function registerFlagStatus(pi: ExtensionAPI) {
     label: "LaunchDarkly: flag status",
     description: "Get a feature flag's status across environments through `ldcli`. Read-only.",
     promptSnippet: "launchdarkly_flag_status: inspect flag status across environments",
+    outputSchema: LD_FLAG_STATUS_OUTPUT_SCHEMA,
     parameters: Type.Object({
       project: Type.String({ description: "LaunchDarkly project key." }),
       flag: Type.String({ description: "Feature flag key." }),

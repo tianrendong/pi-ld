@@ -24,6 +24,16 @@ test("flag list uses fixed JSON output and safe argv", async (t) => {
   assert.equal(calls.length, 1);
 });
 
+test("oversized JSON is capped for the model but complete and redacted for scripts", async (t) => {
+  const items = Array.from({ length: 2_000 }, (_, i) => ({ key: `flag-${i}`, description: "x".repeat(40), sdkKey: "sdk-secret" }));
+  mockCommands(t, () => ({ stdout: JSON.stringify({ items, totalCount: items.length }) }));
+  const result = await flags.execute("id", { project: "p" }, undefined, undefined, ctx);
+  assert.match(result.content[0].text, /JSON output truncated by pi-ld/);
+  assert.equal(result.details.truncated, true);
+  assert.equal(result.structuredContent.items.length, 2_000);
+  assert.equal(result.structuredContent.items[1_999].sdkKey, "<redacted>");
+});
+
 test("mutations require confirmation unless dry-run", async (t) => {
   const calls = mockCommands(t, () => ({ stdout: "{}" }));
   await assert.rejects(

@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { assertSafeKey, flagEq, pushOpt } from "../lib/argv";
-import { parseJsonOutput, runLdcli, toolResult } from "../lib/exec";
+import { LD_FLAG_OUTPUT_SCHEMA, parseJsonOutput, runLdcli, toolResult } from "../lib/exec";
 
 function requireMutationConfirmation(confirm: boolean | undefined, dryRun: boolean | undefined, operation: string): void {
   if (!dryRun && confirm !== true) {
@@ -31,6 +31,7 @@ export function registerFlagToggle(pi: ExtensionAPI) {
       "Inspect the flag with launchdarkly_flag_get before changing it.",
       "For a remote change, state project, flag, environment, desired state, and confirmation before passing confirm:true.",
     ],
+    outputSchema: LD_FLAG_OUTPUT_SCHEMA,
     parameters: ToggleParams,
     async execute(_id, params, signal, _onUpdate, ctx) {
       requireMutationConfirmation(params.confirm, params.dryRun, "launchdarkly_flag_toggle");
@@ -83,6 +84,7 @@ export function registerFlagUpdate(pi: ExtensionAPI) {
       "Inspect the flag with launchdarkly_flag_get first; use IDs and environment keys from its response.",
       "Prefer dryRun:true before applying any patch. Pass confirm:true only after intended project, flag, environment, and patch are explicit.",
     ],
+    outputSchema: LD_FLAG_OUTPUT_SCHEMA,
     parameters: UpdateParams,
     async execute(_id, params, signal, _onUpdate, ctx) {
       requireMutationConfirmation(params.confirm, params.dryRun, "launchdarkly_flag_update");

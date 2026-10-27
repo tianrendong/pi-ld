@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { assertSafeKey, flagEq, pushOpt } from "../lib/argv";
-import { parseJsonOutput, runLdcli, toolResult } from "../lib/exec";
+import { LD_LIST_OUTPUT_SCHEMA, parseJsonOutput, runLdcli, toolResult } from "../lib/exec";
 
 const ListParams = Type.Object({
   limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 1000, description: "Maximum number of resources to return." })),
@@ -32,6 +32,7 @@ export function registerProjectsList(pi: ExtensionAPI) {
     label: "LaunchDarkly: list projects",
     description: "List LaunchDarkly projects through `ldcli`. Read-only. Use project keys returned here with other LaunchDarkly tools.",
     promptSnippet: "launchdarkly_projects_list: list LaunchDarkly projects",
+    outputSchema: LD_LIST_OUTPUT_SCHEMA,
     parameters: ListParams,
     async execute(_id, params, signal, _onUpdate, ctx) {
       const args = listArgs(["projects", "list"], params);
@@ -56,6 +57,7 @@ export function registerEnvironmentsList(pi: ExtensionAPI) {
     label: "LaunchDarkly: list environments",
     description: "List environments in a LaunchDarkly project through `ldcli`. Read-only.",
     promptSnippet: "launchdarkly_environments_list: list environments for project",
+    outputSchema: LD_LIST_OUTPUT_SCHEMA,
     parameters: ProjectParams,
     async execute(_id, params, signal, _onUpdate, ctx) {
       const project = assertSafeKey(params.project, "project");
@@ -73,6 +75,7 @@ export function registerSegmentsList(pi: ExtensionAPI) {
     label: "LaunchDarkly: list segments",
     description: "List segments in a LaunchDarkly project through `ldcli`. Read-only.",
     promptSnippet: "launchdarkly_segments_list: list segments for project",
+    outputSchema: LD_LIST_OUTPUT_SCHEMA,
     parameters: ProjectParams,
     async execute(_id, params, signal, _onUpdate, ctx) {
       const project = assertSafeKey(params.project, "project");
@@ -112,6 +115,7 @@ export function registerFlagsList(pi: ExtensionAPI) {
     label: "LaunchDarkly: list flags",
     description: "List feature flags in a LaunchDarkly project through `ldcli`. Read-only. Use env when configuration for one environment is needed.",
     promptSnippet: "launchdarkly_flags_list: list feature flags",
+    outputSchema: LD_LIST_OUTPUT_SCHEMA,
     parameters: FlagsListParams,
     async execute(_id, params: FlagsListValue, signal, _onUpdate, ctx) {
       const project = assertSafeKey(params.project, "project");

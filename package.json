@@ -1,6 +1,6 @@
 {
   "name": "pi-ld",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Pi tools for reading and safely changing LaunchDarkly feature flags via the ldcli CLI.",
   "keywords": [
     "pi",

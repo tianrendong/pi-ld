@@ -1,6 +1,8 @@
 import { spawn, type ChildProcessByStdio } from "node:child_process";
 import type { Readable } from "node:stream";
 import { resolve } from "node:path";
+import type { AgentToolResult } from "@earendil-works/pi-coding-agent";
+import { Type, type TSchema } from "typebox";
 import { shellJoin } from "./argv";
 
 export interface LdRunOptions {
@@ -167,13 +169,53 @@ export function parseJsonOutput(result: LdRunResult, label: string): unknown {
   }
 }
 
+/** JSON-serializable value accepted as `structuredContent`. */
+type JsonValue = NonNullable<AgentToolResult<unknown>["structuredContent"]>;
+
 export function toolResult(label: string, result: LdRunResult, data: unknown, extra: Record<string, unknown> = {}) {
-  const serialized = JSON.stringify(redactSecrets(data), null, 2);
-  const text = serialized.length > MAX_RESULT_BYTES
-    ? `${serialized.slice(0, MAX_RESULT_BYTES)}\n... [JSON output truncated by pi-ld; narrow query with env/filter/limit]`
+  // Parsed from ldcli stdout, so it is JSON by construction.
+  const redacted = redactSecrets(data) as JsonValue;
+  const serialized = JSON.stringify(redacted, null, 2);
+  const truncated = serialized.length > MAX_RESULT_BYTES;
+  const text = truncated
+    ? `${serialized.slice(0, MAX_RESULT_BYTES)}\n... [JSON output truncated by pi-ld; narrow query with env/filter/limit, or call this tool from a codemode script, which receives the full parsed JSON]`
     : serialized;
   return {
     content: [{ type: "text" as const, text }],
-    details: { label, command: result.args, cwd: result.cwd, ...extra },
+    // Scripts get the complete parsed value; only the model-facing text is size-capped.
+    structuredContent: redacted,
+    details: { label, command: result.args, cwd: result.cwd, truncated, ...extra },
   };
 }
+
+const SCRIPT_NOTE = "Parsed ldcli JSON with secrets redacted; never truncated.";
+
+function ldObject(properties: Record<string, TSchema>, description: string): TSchema {
+  return Type.Object(properties, { additionalProperties: true, description: `${description} ${SCRIPT_NOTE}` });
+}
+
+/** `outputSchema` for list commands (`projects`, `environments`, `segments`, `flags list`). */
+export const LD_LIST_OUTPUT_SCHEMA = ldObject(
+  {
+    items: Type.Optional(Type.Array(Type.Record(Type.String(), Type.Unknown()))),
+    totalCount: Type.Optional(Type.Number()),
+  },
+  "LaunchDarkly list response.",
+);
+
+/** `outputSchema` for commands that return one flag (`get`, `toggle`, `update`). */
+export const LD_FLAG_OUTPUT_SCHEMA = ldObject(
+  {
+    key: Type.Optional(Type.String()),
+    name: Type.Optional(Type.String()),
+    variations: Type.Optional(Type.Array(Type.Record(Type.String(), Type.Unknown()))),
+    environments: Type.Optional(Type.Record(Type.String(), Type.Record(Type.String(), Type.Unknown()))),
+  },
+  "LaunchDarkly feature flag.",
+);
+
+/** `outputSchema` for `flags get-status-across-environments`. */
+export const LD_FLAG_STATUS_OUTPUT_SCHEMA = ldObject(
+  { environments: Type.Optional(Type.Record(Type.String(), Type.Record(Type.String(), Type.Unknown()))) },
+  "LaunchDarkly flag status by environment key.",
+);
